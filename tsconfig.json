@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "jsx": "react-native",
+    "esModuleInterop": true
+  },
+  "include": [
+    "./app" // Adjust the path based on your project's file structure
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
