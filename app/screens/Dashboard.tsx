@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, VStack, Text, Button, Center } from "native-base";
-import { useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../hooks";
 
 export default function Dashboard() {
   const categories = useAppSelector((state) => state.category);

@@ -1,19 +1,19 @@
 // categorySlice.js
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface Category {
+type CategoryState = {
   id: number;
   name: string;
-}
+};
 
-const initialState: Array<Category> = [];
+const initialState: Array<CategoryState> = [];
 
 const categorySlice = createSlice({
   name: "category",
   initialState,
 
   reducers: {
-    addCategory: (state, action: PayloadAction<Category>) => {
+    addCategory: (state, action: PayloadAction<CategoryState>) => {
       state.push(action.payload);
     },
     removeCategory: (state, action: PayloadAction<Number>) => {
