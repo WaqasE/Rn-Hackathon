@@ -1,5 +1,5 @@
 import { extendTheme } from 'native-base'
-import { colors } from './colors'
+import colors from './colors'
 import opacity from './opacity'
 import shadows from './shadow'
 const theme = extendTheme({

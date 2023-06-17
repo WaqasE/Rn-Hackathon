@@ -10,7 +10,5 @@
   "include": [
     "./app" // Adjust the path based on your project's file structure
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["./node_modules"]
 }

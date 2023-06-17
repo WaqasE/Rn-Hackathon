@@ -4,11 +4,14 @@ const Drawer = createDrawerNavigator();
 
 export default function DrawerNav() {
   return (
-    <Drawer.Navigator>
+    <Drawer.Navigator
+      initialRouteName="Dashbaord"
+      screenOptions={{
+        headerTitleAlign: "center",
+      }}
+    >
       <Drawer.Screen name="Dashbaord" component={Dashbaord} />
       <Drawer.Screen name="Manage Catagories" component={Catagories} />
     </Drawer.Navigator>
   );
 }
-
-
