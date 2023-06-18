@@ -3,11 +3,15 @@ import { Dimensions } from "react-native";
 const { width } = Dimensions.get("screen");
 const { height } = Dimensions.get("screen");
 import { Box, Pressable, Input, Flex, Button } from "native-base";
-import { useAppSelector } from "../hooks";
+import { useAppSelector, useAppDispatch } from "../hooks";
 import { MaterialIcons } from "@expo/vector-icons";
 
-export default function Catagory() {
+
+export default function Category() {
   const categories = useAppSelector((state) => state.category);
+  const appDispatch = useAppDispatch();
+
+
 
   return (
     <Flex flexWrap="wrap" direction="row">
