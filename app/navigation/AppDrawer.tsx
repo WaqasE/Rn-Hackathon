@@ -1,7 +1,6 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Catagories, Dashbaord } from "../screens";
 import { useAppSelector } from "../hooks";
-import { Text } from "native-base";
 
 const Drawer = createDrawerNavigator();
 
