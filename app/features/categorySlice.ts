@@ -1,93 +1,53 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export enum FieldType {
-  Date = "DATE",
-  Text = "TEXT",
-  Checkbox = "CHECKBOX",
-  Number = "NUMBER",
-}
-
-export type FieldState = {
+export type CategoryState = {
   id: number;
   name: string;
-  type: FieldType;
-  isTitle: Boolean;
+  fieldIds: number[];
 };
 
-type CategoryState = {
-  id: number;
-  name: string;
-  field: Array<FieldState>;
-};
-
-const initialState: Array<CategoryState> = [];
+const initialState: CategoryState[] = [];
 
 const categorySlice = createSlice({
   name: "category",
   initialState,
+
   reducers: {
     addCategory: (state, action: PayloadAction<CategoryState>) => {
       state.push(action.payload);
     },
-    updateCategory: (state, action: PayloadAction<CategoryState>) => {
-      const { id, name } = action.payload;
-      const categoryIndex = state.findIndex((category) => category.id === id);
-      if (categoryIndex !== -1) {
-        state[categoryIndex].name = name;
+    updateCategory: (
+      state,
+      action: PayloadAction<CategoryState>
+    ) => {
+      const { id, name, fieldIds } = action.payload;
+      const category = state.find((category) => category.id === id);
+      if (category) {
+        category.name = name;
+        category.fieldIds = fieldIds;
       }
     },
     removeCategory: (state, action: PayloadAction<number>) => {
       return state.filter((category) => category.id !== action.payload);
     },
-    addField: (
+    addFieldToCategory: (
       state,
-      action: PayloadAction<FieldState & { categoryId: number }>
+      action: PayloadAction<{ categoryId: number; fieldId: number }>
     ) => {
-      const { categoryId, ...field } = action.payload;
-      const categoryIndex = state.findIndex(
-        (category) => category.id === categoryId
-      );
-      if (categoryIndex !== -1) {
-        state[categoryIndex].field.push(field);
+      const { categoryId, fieldId } = action.payload;
+      const category = state.find((category) => category.id === categoryId);
+      if (category) {
+        category.fieldIds.push(fieldId);
       }
     },
-    updateField: (
+    removeFieldFromCategory: (
       state,
-      action: PayloadAction<FieldState & { categoryId: number; id: number }>
+      action: PayloadAction<{ categoryId: number; fieldId: number }>
     ) => {
-      const { categoryId, id, ...updatedField } = action.payload;
-      const categoryIndex = state.findIndex(
-        (category) => category.id === categoryId
-      );
-      if (categoryIndex !== -1) {
-        const category = state[categoryIndex];
-        const fieldIndex = category.field.findIndex((field) => field.id === id);
-        if (fieldIndex !== -1) {
-          state[categoryIndex].field = category.field.map((field) => ({
-            ...field,
-            isTitle: field.id === id ? true : false,
-          }));
-          state[categoryIndex].field[fieldIndex] = {
-            ...state[categoryIndex].field[fieldIndex],
-            ...updatedField,
-          };
-        }
-      }
-    },
-    removeField: (
-      state,
-      action: PayloadAction<{ categoryId: number; id: number }>
-    ) => {
-      const { categoryId, id } = action.payload;
-      const categoryIndex = state.findIndex(
-        (category) => category.id === categoryId
-      );
-      if (categoryIndex !== -1) {
-        const updatedCategory = { ...state[categoryIndex] };
-        updatedCategory.field = updatedCategory.field.filter((item) => {
-          return item.id !== id;
-        });
-        state[categoryIndex] = updatedCategory;
+      const { categoryId, fieldId } = action.payload;
+      const category = state.find((category) => category.id === categoryId);
+      if (category) {
+        category.fieldIds = category.fieldIds.filter((id) => id !== fieldId);
       }
     },
   },
@@ -97,9 +57,8 @@ export const {
   addCategory,
   updateCategory,
   removeCategory,
-  addField,
-  updateField,
-  removeField,
+  addFieldToCategory,
+  removeFieldFromCategory,
 } = categorySlice.actions;
 
 export default categorySlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
 const { width } = Dimensions.get("screen");
 import { MaterialIcons } from "@expo/vector-icons";
@@ -16,55 +16,67 @@ import Field from "./Field";
 import {
   updateCategory,
   removeCategory,
+  addFieldToCategory,
+} from "../features/categorySlice";
+import {
   addField,
   FieldState,
   FieldType,
   updateField,
-} from "../features/categorySlice";
+} from "../features/fieldSlice";
 import { useAppSelector, useAppDispatch } from "../hooks";
 
 type categoryProps = {
   categoryId: number;
-  field: Array<FieldState>;
+  fieldIds: Array<number>;
 };
 
-export default function Category({ categoryId, field = [] }: categoryProps) {
+export default function Category({ categoryId, fieldIds }: categoryProps) {
   const categories = useAppSelector((state) => state.category);
+  const fields = useAppSelector((state) => state.field);
   const appDispatch = useAppDispatch();
+  const [isPopOver, setIsPopOver] = useState(false);
   const [categoryName, setCategoryName] = useState(
-    categories[categoryId]?.name || "New Category"
+    categories[categoryId]?.name || ""
   );
 
   const handleCategoryName = (value: string) => {
     setCategoryName(value);
-    const prevState = { ...categories[categoryId] };
-    prevState.name = value;
-    appDispatch(updateCategory(prevState));
+    appDispatch(updateCategory({ id: categoryId, name: value, fieldIds:fieldIds }));
   };
 
   const handleAddField = () => {
-    const fieldTemp = {
-      id: (field?.length || 0) + 1,
-      name: "UNNAMED FIELD",
+    let fieldPayload = {
+      id: (fields.length || 0) + 1,
+      name: "",
       type: FieldType.Text,
-      isTitle: categories[categoryId]?.field?.length ? false : true,
-      categoryId: categoryId,
+      isTitle: false,
     };
-    appDispatch(addField(fieldTemp));
+    appDispatch(addField(fieldPayload));
+    let addFieldToCategoryPayload = {
+      categoryId: categoryId,
+      fieldId: fieldPayload.id,
+    };
+    appDispatch(addFieldToCategory(addFieldToCategoryPayload));
   };
 
   const getTitle = () => {
-    let index = field.findIndex((item) => item.isTitle===true);
-    if (index !== 1) {
-      return field[index].name;
+    let index = fields.findIndex((item, index) => {
+      if (fieldIds.includes(item.id) && item.isTitle === true) {
+        return index;
+      }
+      return -1;
+    });
+    if (index !== 1 && fields[index]?.name) {
+      return fields[index]?.name;
     }
     return "UNNAMED FIELD";
   };
 
   const handleTitleUpdate = (item: FieldState) => {
+    setIsPopOver(false);
     appDispatch(
       updateField({
-        categoryId: categoryId,
         ...item,
         isTitle: true,
       })
@@ -74,7 +86,7 @@ export default function Category({ categoryId, field = [] }: categoryProps) {
   return (
     <Box width={width - 40} backgroundColor="dark.900" padding={5} shadow={2}>
       <VStack space="4">
-        <Heading size="sm">{categoryName}</Heading>
+        <Heading size="sm">{categoryName || "New Category" }</Heading>
         <Input
           size="xs"
           placeholder="New Category"
@@ -83,20 +95,21 @@ export default function Category({ categoryId, field = [] }: categoryProps) {
           onChangeText={handleCategoryName}
           value={categoryName}
         />
-        {(field || [])?.map((item, index) => (
-          <Field key={index} item={item} categoryId={categoryId} />
-        ))}
+        {(fields || [])?.map((item, index) => {
+          if (fieldIds.includes(item.id)) {
+            return <Field key={index} item={item} categoryId={categoryId} />;
+          }
+        })}
         <Popover
+          isOpen={isPopOver}
           trigger={(triggerProps) => (
             <Button
               {...triggerProps}
               backgroundColor="singletons.purple"
               mt={1}
+              onPress={() => setIsPopOver(true)}
             >
-              <Text color="white">
-                {" "}
-                TITLE FIELD: {field.length ? getTitle() : "UNNAMED FIELD"}
-              </Text>
+              <Text color="white"> TITLE FIELD: {getTitle()}</Text>
             </Button>
           )}
         >
@@ -107,16 +120,20 @@ export default function Category({ categoryId, field = [] }: categoryProps) {
           >
             <Popover.Arrow />
             <Popover.Body>
-              {(field || [])?.map((item, index) => (
-                <Button
-                  key={index}
-                  background="white"
-                  color="dark.900"
-                  onPress={() => handleTitleUpdate(item)}
-                >
-                  <Text>{item.name}</Text>
-                </Button>
-              ))}
+              {(fields || [])?.map((item, index) => {
+                if (fieldIds.includes(item.id)) {
+                  return (
+                    <Button
+                      key={index}
+                      background="white"
+                      color="dark.900"
+                      onPress={() => handleTitleUpdate(item)}
+                    >
+                      <Text>{item.name}</Text>
+                    </Button>
+                  );
+                }
+              })}
             </Popover.Body>
           </Popover.Content>
         </Popover>

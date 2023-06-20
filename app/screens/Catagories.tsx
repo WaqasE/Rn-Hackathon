@@ -4,30 +4,31 @@ const { width } = Dimensions.get("screen");
 const { height } = Dimensions.get("screen");
 import { ScrollView, Center, VStack, Text, Button, HStack } from "native-base";
 import { useAppSelector, useAppDispatch } from "../hooks";
-import { FieldType, addCategory } from "../features/categorySlice";
+import { addCategory } from "../features/categorySlice";
+import { FieldType } from "../features/fieldSlice";
 import Catagory from "../components/Catagory";
+import { addField } from "../features/fieldSlice";
 
 export default function Catagories() {
   const categories = useAppSelector((state) => state.category);
+  const fields = useAppSelector((state) => state.field);
   const appDispatch = useAppDispatch();
 
   const addCatagory = () => {
-    appDispatch(
-      addCategory({
-        id: categories.length + 1,
-        name: "New Catagory",
-        field: [
-          { id: 1, name: "UNNAMED FIELD", type: FieldType.Text, isTitle: true },
-        ],
-      })
-    );
+    let fieldPayload = {
+      id: (fields.length || 0) + 1,
+      name: "",
+      type: FieldType.Text,
+      isTitle: false,
+    };
+    appDispatch(addField(fieldPayload));
+    let categoryPayload = {
+      id: (categories.length || 0) + 1,
+      name: "",
+      fieldIds: [fieldPayload["id"]],
+    };
+    appDispatch(addCategory(categoryPayload));
   };
-
-  useEffect(() => {
-    categories?.map((item) => {
-      console.log({ item }, item.field);
-    });
-  }, [categories]);
 
   return (
     <ScrollView>
@@ -40,8 +41,8 @@ export default function Catagories() {
           paddingY={(height / 100) * 5}
         >
           {!categories.length && <Text>No categories to display</Text>}
-          {categories?.map(({ id, field }, index) => (
-            <Catagory key={index} categoryId={id} field={field} />
+          {categories?.map(({ id, fieldIds }, index) => (
+            <Catagory key={index} categoryId={id} fieldIds={fieldIds} />
           ))}
           <Button
             width={width - (width / 100) * 5}

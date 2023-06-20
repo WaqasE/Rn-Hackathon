@@ -1,7 +1,4 @@
 import React, { useState } from "react";
-import { Dimensions } from "react-native";
-const { width } = Dimensions.get("screen");
-const { height } = Dimensions.get("screen");
 import { Popover, Input, Flex, Button, Text, VStack } from "native-base";
 import { useAppSelector, useAppDispatch } from "../hooks";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -10,7 +7,8 @@ import {
   FieldType,
   removeField,
   updateField,
-} from "../features/categorySlice";
+} from "../features/fieldSlice";
+import { removeFieldFromCategory } from "../features/categorySlice";
 type FieldProps = {
   categoryId: number;
   item: FieldState;
@@ -18,26 +16,30 @@ type FieldProps = {
 
 export default function Field({ categoryId, item }: FieldProps) {
   const categories = useAppSelector((state) => state.category);
-  const [fieldName, setFieldName] = useState("");
+  const [fieldName, setFieldName] = useState(item?.name || "");
   const appDispatch = useAppDispatch();
+  const [isPopOver, setIsPopOver] = useState(false);
 
   const handleFieldName = (value: string) => {
     setFieldName(value);
-    appDispatch(updateField({ categoryId, id: item.id, name: value }));
+    appDispatch(updateField({ ...item, name: value }));
   };
 
   const handleFieldTypeSelect = (fieldType: FieldType) => {
+    setIsPopOver(false);
     appDispatch(
       updateField({
-        id: item.id,
-        categoryId: categoryId,
+        ...item,
         type: fieldType,
       })
     );
   };
 
   const removeFieldHandler = () => {
-    appDispatch(removeField({ categoryId: categoryId, id: item?.id }));
+    appDispatch(
+      removeFieldFromCategory({ categoryId: categoryId, fieldId: item?.id })
+    );
+    appDispatch(removeField(item.id));
   };
 
   return (
@@ -52,6 +54,7 @@ export default function Field({ categoryId, item }: FieldProps) {
         value={fieldName}
       />
       <Popover
+        isOpen={isPopOver}
         trigger={(triggerProps) => (
           <Button
             {...triggerProps}
@@ -60,6 +63,7 @@ export default function Field({ categoryId, item }: FieldProps) {
             borderRadius={0}
             borderLeftWidth={0}
             borderRightWidth={0}
+            onPress={() => setIsPopOver(true)}
           >
             {item.type}
           </Button>
